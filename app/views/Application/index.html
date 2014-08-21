@@ -46,6 +46,9 @@ $(function() {
 		return sprite.position.x + offset;
 	};
 
+	var log = function(message) {
+		$('#thread').append("<div>"+message+"</div>");
+	}
 	// ----------------------- Receive Message --------------------
 	var receiveMessage = function (event) {
 		var parsedEvent = JSON.parse(event);
@@ -59,9 +62,17 @@ $(function() {
 
 			var player = players[parsedEvent.playerId];
 			var bubbleObject = makeSpeechBubble(parsedEvent.playerMessage);
+			if (player.speechBubble) {
+				stage.removeChild(player.text);
+				stage.removeChild(player.speechBubble);
+			}
 			player.speechBubble = bubbleObject.speechBubble;
 			player.text = bubbleObject.text;
-			setTimeout(function() { player.speechBubble.opacity = 0.9;},5000);
+			setTimeout(function() {
+				if (player.speechBubble) {
+					player.speechBubble.opacity = 0.9;
+				}
+			},5000);
 		}
 		// ----------------- join message ------------------
 		if (parsedEvent.action == "JOIN") {
@@ -260,7 +271,7 @@ $(function() {
 
 	function makeSpeechBubble(textMessage) {
 		// TODO I don't like the way this is--we have to construct the text object twice
-		var text = new PIXI.Text(textMessage, {font: "15px Snippet", fill: "white", align: "center"});
+		var text = new PIXI.Text(textMessage, {font: "15px Snippet", fill: "white", align: "center", wordWrap:true, wordWrapWidth:214});
 		text.position.x = 200 - text.width / 2;
 		text.position.y = 150 + offsety - text.height /2;
 
@@ -270,16 +281,17 @@ $(function() {
 		graphics.beginFill(0xefefef);
 		graphics.lineStyle(3, 0xdddddd, 1);
 		var offsety = -105;
-		// graphics.drawEllipse ( 200,150 + offsety,100,50);
-		graphics.drawRoundedRect(0,0,text.width+20,42,5);
+		graphics.drawRoundedRect(0,15,text.width+20,11 + text.height,5);
 		graphics.endFill();
 
 		stage.addChild(graphics);
 
-		text = new PIXI.Text(textMessage, {font: "15px Snippet", fill: "ccc", align: "center"});
+		text = new PIXI.Text(textMessage, {font: "15px Snippet", fill: "ccc", align: "center", wordWrap:true, wordWrapWidth:214});
 		text.position.x = 200 - text.width / 2;
 		text.position.y = 150 + offsety - text.height /2;
 
+		log("text width is" + text.width);
+		log("text height is" + text.height);
 		stage.addChild(text);
 		return {speechBubble:graphics,text:text};
 	}
