@@ -46,16 +46,16 @@ public class Comms extends WebSocketController {
 //					actionReport.setPlayerName(name);
 //				}
 //				else
-				if (message.startsWith("id")) {
+				if (message.startsWith("playerId")) {
 					String id = getIdFromMessage(message);
 					playerId = id;
-					Logger.info("playerId is " + id);
 					final Player player = playersMap.get(id);
 					if (player == null) {
 						Logger.warn("no player for id " + id);
 					} else {
 						String messageAction = getActionFromMessage(message);
 						action = Action.valueOf(messageAction);
+						Logger.info(messageAction);
 						if (Action.TALK == action) {
 							Logger.info("Got talk message:" + message);
 							String says = getPlayerMessageFromMessage(message);
@@ -66,11 +66,11 @@ public class Comms extends WebSocketController {
 							setupActionReport(action,actionReport,player);
 						}
 						if (Action.MOVE == action) {
-							setupActionReport(action,actionReport,player);
 							double x = getXPositionFromMoveMessage(message);
 							double y = getYPositionFromMoveMessage(message);
 							player.setX(x);
 							player.setY(y);
+							setupActionReport(action,actionReport,player);
 						}
 						if (!outboundSockets.contains(outbound)) {
 							outboundSockets.add(outbound);
@@ -82,9 +82,10 @@ public class Comms extends WebSocketController {
 			}
 
 			actionReport.setPositions(playersMap.values());
+			Logger.info("action report " + actionReport.toString());
 			if (action != null) {
 				for (Http.Outbound outboundSocket : outboundSockets) {
-					Logger.info(outboundSocket.toString());
+					Logger.info("outbound is " + outboundSocket.toString());
 					outboundSocket.sendJson(actionReport);
 				}
 			}
@@ -104,11 +105,17 @@ public class Comms extends WebSocketController {
 	}
 
 	private static double getYPositionFromMoveMessage(String message) {
-		return Double.valueOf(message.split(":")[4]);
+		if (message != null && message.split(":").length == 5) {
+			return Double.valueOf(message.split(":")[4]);
+		}
+		return 0;
 	}
 
 	private static double getXPositionFromMoveMessage(String message) {
-		return Double.valueOf(message.split(":")[3]);
+		if (message != null && message.split(":").length == 5) {
+			return Double.valueOf(message.split(":")[3]);
+		}
+		return 0;
 	}
 
 	private static void setupActionReport(Action action, ActionReport actionReport, Player player) {
@@ -119,7 +126,10 @@ public class Comms extends WebSocketController {
 	}
 
 	private static String getPlayerMessageFromMessage(String message) {
-		return message.split(":")[3];
+		if (message.split(":").length == 4) {
+			return message.split(":")[3];
+		}
+		return "error";
 	}
 
 	private static String getActionFromMessage(String message) {

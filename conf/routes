@@ -4,6 +4,9 @@
 
 WS      /search                                Comms.stream
 POST    /join                                   Application.join
+
+GET		/motionTest							Application.motionTest
+
 # Home page
 GET     /                                       Application.index
 

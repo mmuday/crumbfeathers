@@ -61,4 +61,20 @@ public class ActionReport {
 	public String getPlayerId() {
 		return playerId;
 	}
+
+	@Override
+	public String toString() {
+		String positionString = "";
+		for (Player position : positions) {
+			positionString += "\n" + position.toString();
+		}
+		return "ActionReport{" +
+				"action=" + action +
+				", playerName='" + playerName + '\'' +
+				", playerColor='" + playerColor + '\'' +
+				", playerMessage='" + playerMessage + '\'' +
+				", playerId='" + playerId + '\'' +
+				", positions=" + positionString +
+				'}';
+	}
 }

@@ -21,4 +21,8 @@ public class Application extends Controller {
 		result.put("id",player.getId());
 		renderJSON(result);
 	}
+
+	public static void motionTest() {
+		render();
+	}
 }

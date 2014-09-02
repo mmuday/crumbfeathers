@@ -64,4 +64,14 @@ public class Player {
 	public String getIcon() {
 		return icon;
 	}
+
+	@Override
+	public String toString() {
+		return "Player{" +
+				"id='" + id + '\'' +
+				", name='" + name + '\'' +
+				", x=" + x +
+				", y=" + y +
+				'}';
+	}
 }

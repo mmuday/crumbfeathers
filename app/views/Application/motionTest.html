@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+	<script src="public/javascripts/jquery-1.11.1.min.js"></script>
+	<script src="public/javascripts/sugar.min.js"></script>
+	<script src="public/javascripts/pixi.dev.js"></script>
+	<script src="public/javascripts/keyboard.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+$(function() {
+
+	// create an new instance of a pixi stage
+	var stage = new PIXI.Stage(0x66FF99);
+
+	// create a renderer instance
+	var screenYSize = 500;
+	var screenXSize = 500;
+	var renderer = PIXI.autoDetectRenderer(screenXSize, screenYSize, $("#canvas")[0]);
+
+	var texture = PIXI.Texture.fromImage("/public/images/skully.png");
+	var sprite = new PIXI.Sprite(texture);
+	sprite.anchor.x = 0.5;
+	sprite.anchor.y = 0.5;
+
+	// move the sprite to the center of the screen
+	sprite.position.x = 200;
+	sprite.position.y = 200;
+
+
+	requestAnimFrame(animate);
+
+	var backgroundTexture = new PIXI.Texture.fromImage("/public/images/background.jpg");
+	var background = new PIXI.TilingSprite(backgroundTexture, 500, 500);
+	background.position.x = 0;
+	background.position.y = 0;
+	background.tilePosition.x = 0;
+	background.tilePosition.y = 0;
+
+	stage.addChild(background);
+	stage.addChild(sprite);
+	var speed = 2;
+	var lastX = 0;
+	var lastY = 0;
+
+	var worldX = 200;
+	var worldY = 200;
+	function calculateScreenPosition(worldX,worldY) {
+		var screenX = screenXSize/2;
+		var screenY = screenYSize/2;
+		var mapOffsetX;
+		var mapOffsetY;
+		if (worldX < screenXSize/2) {
+			screenX = worldX;
+			mapOffsetX = 0;
+		} else {
+			mapOffsetX = -(worldX - screenXSize/2);
+		}
+		if (worldY < screenYSize / 2) {
+			screenY = worldY;
+			mapOffsetY = 0;
+		} else {
+			mapOffsetY = -(worldY - screenYSize/2);
+		}
+
+		// TODO - deal with the other side of the world;
+		return {
+			screenX: screenX,
+			screenY: screenY,
+			mapOffsetX: mapOffsetX,
+			mapOffsetY: mapOffsetY
+		}
+	}
+
+	function handleKeyboard(message) {
+		if (message.indexOf("up") != -1) {
+			worldY -= speed;
+		}
+		if (message.indexOf("down") != -1) {
+			worldY += speed;
+		}
+		if (message.indexOf("left") != -1) {
+			worldX -= speed;
+		}
+		if (message.indexOf("right") != -1) {
+			worldX += speed;
+		}
+		if (lastX != sprite.position.x || lastY != sprite.position.y) {
+			lastX = worldX;
+			lastY = worldY;
+		}
+	}
+
+	function handlePositions() {
+		var pos = calculateScreenPosition(worldX,worldY);
+		sprite.position.x = pos.screenX;
+		sprite.position.y = pos.screenY;
+		background.tilePosition.x = pos.mapOffsetX;
+		background.tilePosition.y = pos.mapOffsetY;
+
+	}
+
+
+
+	function animate() {
+		requestAnimFrame(animate);
+		var message = KeyboardJS.activeKeys();
+		handleKeyboard(message);
+		handlePositions();
+		// render the stage
+		renderer.render(stage);
+	}
+
+});
+</script>
+<canvas style="height:500px;width:500px;" id="canvas"></canvas>
+
+<div id="thread"></div>
+
+</body>
+</html>
